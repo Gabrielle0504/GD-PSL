@@ -144,3 +144,21 @@ same axes, limits, marker sizes, and three-dimensional camera.
 - No two methods write to the same run directory.
 - Failed runs are rerun with the same method, task, and seed.
 - Stage-A seeds are never reused in Stage B.
+
+## 9. Legacy optimizer resolution
+
+Stage-B artifacts store the historical configuration value `optimizer: auto`,
+but that code version did not serialize the resolved optimizer. Deterministic
+replay of the first epoch for `GD-PSL_NSGAII/DTLZ2_3obj/seed_101` identifies
+the optimizer used by the formal run:
+
+| Optimizer | Training loss | Validation loss |
+|---|---:|---:|
+| Recorded run | 0.014777269738820353 | 0.007486683056701496 |
+| Standard AdamW replay | 0.014777269459324276 | 0.007486678697983614 |
+| Schedule-Free AdamW replay | 0.009857631926966206 | 0.006699644480186107 |
+
+The recorded trajectory agrees with standard AdamW to numerical replay
+tolerance. The formal main stage and fine-tuning stage are therefore reported
+as standard AdamW. Current runs serialize `optimizer_resolved` and
+`fine_tune_optimizer_resolved` directly.

@@ -1,8 +1,8 @@
 """Single editable configuration source for fill-then-judge experiments.
 
-Edit ``DEFAULT_CONFIG`` below, then run ``python experiment_config.py`` to
+Edit ``DEFAULT_CONFIG`` below, then run ``python -m gd_psl.config`` to
 validate and print the effective configuration.  Command-line options in
-``run_fill_then_judge.py`` may still override these defaults for one run.
+``run_gd_psl.py`` may still override these defaults for one run.
 """
 
 from __future__ import annotations

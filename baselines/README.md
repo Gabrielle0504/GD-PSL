@@ -10,6 +10,6 @@ historical experiment artifacts under separate copyright terms. The exact
 observations carried into this implementation are documented in
 `../docs/pang_full_text_reproduction.md`.
 
-The project-level runner `../run_pang_archive_baseline.py` applies the Pang
+The project-level runner `../run_pang.py` applies the Pang
 archive method to the common problem suite and common true-FE protocol used in
 the GD-PSL comparison.

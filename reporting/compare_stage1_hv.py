@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata, wilcoxon
 
-from experiment_config import ALLOWED_EA_FILL_SPLITS
+from gd_psl.config import ALLOWED_EA_FILL_SPLITS
 
 
 RATIOS = tuple(ALLOWED_EA_FILL_SPLITS)

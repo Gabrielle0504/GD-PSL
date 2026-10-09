@@ -17,7 +17,7 @@ from typing import Optional, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pareto_utils import nondominated_indices
+from gd_psl.archive import nondominated_indices
 
 
 def _as_2d(values: np.ndarray, columns: Optional[int] = None) -> np.ndarray:

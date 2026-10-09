@@ -3,122 +3,74 @@
 **Gap-Directed Pareto Set Learning for empirical Pareto-front completion**
 
 GD-PSL is a post-evolutionary completion strategy for multi-objective
-optimization. A configurable PlatEMO algorithm first builds a cumulative
-empirical Pareto archive. GD-PSL then identifies under-covered regions in
-preference space, trains a preference-to-decision model, evaluates generated
-decisions with the true objective functions, audits direction, support, and
-front-envelope consistency, and then applies finite, objective-unique,
-nondominated archive merging to every evaluated candidate.
+optimization. A PlatEMO optimizer first constructs a cumulative archive from
+all true evaluations. GD-PSL then detects sparsely covered, archive-supported
+preference regions, trains a preference-to-decision model, refines its
+proposals locally, and evaluates every proposal with the true objective
+functions. The reported archive is the finite, objective-unique nondominated
+set over the EA archive and all evaluated model proposals.
 
-The optimization procedure never uses a benchmark reference Pareto front.
-Reference fronts and fixed normalization data are available only to the
-post-run evaluation code.
+Reference Pareto fronts are never used by search, training, query allocation,
+candidate diagnostics, or archive construction. They are loaded only after a
+run to calculate HV and projected IGD-infinity.
 
-## Method scope
-
-- Base optimizers: NSGA-II, NSGA-III, MOEA/D, or another compatible PlatEMO
-  algorithm.
-- Completion model: a PyTorch preference-to-decision network with validation
-  loss monitoring and early stopping.
-- Runtime diagnostics: empirical direction agreement, local front support,
-  and a one-sided empirical-front envelope. Final archive retention uses finite
-  objectives, duplicate removal, and nondominated filtering.
-- Primary evaluation: hypervolume (HV), IGD-infinity, and algorithm runtime.
-- Baseline: an isolated reproduction of Pang, Nan, and Ishibuchi (SMC 2023).
-
-Every model-generated decision consumes one function evaluation when its true
-objectives are evaluated, regardless of whether it is retained in the final
-archive.
-
-## Repository layout
+## Repository
 
 ```text
-gd_psl/                         GD-PSL implementation
-matlab/                         PlatEMO bridge, exact-budget adapters, RE problems
-baselines/                      Independent Pang baseline reproduction
-data/                           Fixed benchmark fronts and normalization data
-docs/                           Protocol, pseudocode, and reproduction notes
-tests/                          Unit tests that do not require a live MATLAB session
-reporting/                      Visualization, comparison plots, and statistics
-scripts/                        Reproducible shell launchers for formal experiments
-tools/                          Non-formal diagnostic utilities
-results/                        Generated artifacts; ignored by Git
+gd_psl/             GD-PSL, configuration, metrics, and problem definitions
+matlab/             PlatEMO bridge, exact-FE adapters, and formal RE problems
+data/               Fixed PF and normalization files for the nine-task suite
+baselines/          Standalone Pang et al. reproduction
+reporting/          Stage A/B aggregation and run visualization
+scripts/            Formal Stage A/B launchers
+tests/              Unit tests independent of a live MATLAB session
+docs/               Formal protocol, pseudocode, and Pang reproduction map
 
-run_fill_then_judge.py          Main GD-PSL and pure-EA entry point
-run_pang_archive_baseline.py    Project-suite Pang baseline entry point
-experiment_config.py            Shared experiment and model configuration
+run_gd_psl.py       GD-PSL and equal-budget pure-EA entry point
+run_pang.py         PangMOEAD entry point for the common experiment suite
 ```
+
+Generated artifacts are written under `results/` and are not committed.
 
 ## Requirements
 
 - Python 3.10 or newer
-- MATLAB with the MATLAB Engine for Python
+- MATLAB and MATLAB Engine for Python
 - PlatEMO
 - NumPy, SciPy, PyTorch, and matplotlib
-- A CUDA-capable PyTorch installation for GD-PSL model training
-- AdamW is the explicit default optimizer. `schedulefree_adamw` remains an
-  optional mode, and each run records both the requested and resolved optimizer.
+- CUDA-capable PyTorch for model training
 
-Install PyTorch using the command appropriate for the server CUDA version,
-then install this project's remaining dependencies:
+Install the PyTorch build appropriate for the server CUDA version, then run:
 
 ```bash
-python -m pip install -r requirements.txt
-python -m pip install -e . --no-deps
-```
-
-The editable installation keeps the packaged reference fronts and MATLAB
-adapters anchored to the checked-out repository. MATLAB Engine is installed
-using MathWorks' instructions for the local MATLAB release; it is not fetched
-from PyPI by this project.
-
-Set the PlatEMO path either on the command line or through `PLATEMO_ROOT`:
-
-```bash
+python -m pip install -e .
 export PLATEMO_ROOT=/workspace/PlatEMO/PlatEMO
 ```
 
-## Quick start
+MATLAB Engine is installed using MathWorks' instructions for the local MATLAB
+release; this project does not fetch it from PyPI.
 
-Validate the central configuration:
+## Run one experiment
 
-```bash
-python experiment_config.py
-```
-
-Run GD-PSL with NSGA-II:
+GD-PSL with NSGA-II:
 
 ```bash
-python run_fill_then_judge.py \
+python run_gd_psl.py \
   --algorithms NSGAII \
   --problems dtlz2 \
   --n-objectives 3 \
   --population-size 91 \
   --max-fe 91000 \
   --ea-fill-split 90:10 \
-  --runs 1 \
-  --device cuda \
+  --runs 1 --device cuda \
   --platemo-root "$PLATEMO_ROOT"
 ```
 
-Run the equal-budget pure EA by adding `--ea-only`:
+The equal-budget pure EA uses the same command with `--ea-only`. The common
+suite Pang baseline is run with:
 
 ```bash
-python run_fill_then_judge.py \
-  --algorithms NSGAII \
-  --problems dtlz2 \
-  --n-objectives 3 \
-  --population-size 91 \
-  --max-fe 91000 \
-  --runs 1 \
-  --ea-only \
-  --platemo-root "$PLATEMO_ROOT"
-```
-
-Run the project-suite Pang baseline:
-
-```bash
-python run_pang_archive_baseline.py \
+python run_pang.py \
   --algorithms PangMOEAD \
   --problems dtlz2 \
   --n-objectives 3 \
@@ -128,44 +80,26 @@ python run_pang_archive_baseline.py \
   --platemo-root "$PLATEMO_ROOT"
 ```
 
-The paper-specific, standalone Pang reproduction is
-`baselines/pang_2023_baseline.py`. It is intentionally independent of GD-PSL
-and supports the paper's three- and five-objective DTLZ2/DTLZ7 protocol.
+All editable hyperparameters and their validation rules are in
+`gd_psl/config.py`. Command-line options override them for one run.
 
-## Formal experiment protocol
+## Reproduce the formal study
 
-The pre-specified two- and three-objective study uses 1,000 evaluated population
-equivalents:
+The formal suite contains DTLZ2, DTLZ7, RE21, RE24, RE31, RE32, RE34, RE35,
+and RE37. Two-objective tasks use population 100 and 100,000 true function
+evaluations (FE); three-objective tasks use population 91 and 91,000 FE. The
+initial population counts toward the total budget.
 
-| Objective count | Population | Total true FE |
-|---:|---:|---:|
-| 2 | 100 | 100,000 |
-| 3 | 91 | 91,000 |
-
-The first stage evaluates the pre-specified splits `50:50`, `60:40`, `70:30`,
-`80:20`, and `90:10` using ablation seeds 21-40. A single split is selected and
-frozen before the formal comparison. The second stage compares NSGA-II,
-NSGA-III, MOEA/D, their three GD-PSL variants, and PangMOEAD using 20 paired
-seeds, 101-120.
-
-The values in `DEFAULT_CONFIG` are convenient single-run defaults, not an
-implicit formal protocol. Formal launch commands must pass the population and
-FE values specified for each objective count above.
-
-Run one Stage 1 allocation on an experiment server:
+Stage A evaluates each pre-specified EA/FILL split with seeds 21--40:
 
 ```bash
-scripts/run_stage1_ratio.sh 80:20
+scripts/run_stage1_ratio.sh 90:10
+scripts/run_stage1_pure_ea.sh NSGAII
+python -m reporting.compare_ratios --stage1-root results/stage1
+python -m reporting.compare_stage1_hv --stage1-root results/stage1
 ```
 
-Resume the same allocation while preserving completed seeds:
-
-```bash
-scripts/run_stage1_ratio.sh --resume 80:20
-```
-
-Run one Stage 2 method on its assigned server. The script fixes the
-formal seeds to 101-120 and writes every method under `results/stage2/`:
+Stage B uses paired seeds 101--120. Run one method per server:
 
 ```bash
 scripts/run_stage2_method.sh GD-PSL_NSGAII
@@ -173,94 +107,68 @@ scripts/run_stage2_method.sh GD-PSL_NSGAII
 
 Accepted method names are `EA_NSGAII`, `EA_NSGAIII`, `EA_MOEAD`,
 `GD-PSL_NSGAII`, `GD-PSL_NSGAIII`, `GD-PSL_MOEAD`, and `PangMOEAD`.
-After all seven allocations finish, generate the 20-run statistics and PF
-comparison with:
+After all seven methods finish:
 
 ```bash
 python -m reporting.compare_stage2 --results-root results/stage2
 ```
 
-See [docs/formal_experiment_protocol.md](docs/formal_experiment_protocol.md)
-for the complete pre-specified problem list, selection rule, timing boundary,
-archive definition, and statistical analysis.
-The legacy formal artifacts' resolved training optimizer is documented in
-[docs/formal_optimizer_resolution.md](docs/formal_optimizer_resolution.md).
+The launchers accept `PROJECT_ROOT`, `PYTHON_BIN`, `PLATEMO_ROOT`, and
+`OUTPUT_DIR`; their defaults reproduce the experiment-server layout. The full
+frozen design is in `docs/formal_experiment_protocol.md`.
 
-## Outputs
+## Result contract
 
-Runs are stored under:
+Each run is stored as:
 
 ```text
 results/<method>/<problem>_<M>obj/seed_<seed>/
 ```
 
-Important artifacts include:
+The key files are:
 
-- `base_pf.csv`: finite, objective-unique nondominated cumulative EA archive;
-- `model_candidates.csv`: all true-evaluated model candidates;
-- `completed_pf.csv`: final finite, objective-unique nondominated archive over
-  the cumulative EA archive and all true-evaluated model candidates;
-- `gap_regions.csv` and `unfilled_regions.csv`: hole-selection audit data;
-- `training_history.csv` and `training_summary.json`: loss and stopping data;
-- `summary.json`: FE usage, stage timing, metrics, and effective configuration.
+- `fronts.npz`: evaluated history, EA archive, model candidates, and completed archive;
+- `summary.json`: FE use, timing, metrics, and effective configuration;
+- `training_history.csv`: training and validation losses;
+- `gap_regions.csv`: query roles, empirical diagnostics, and archive status.
 
-For GD-PSL plots, blue points are retained EA archive points and red points
-are true-evaluated model points that survive in the final nondominated archive.
-Pure EA and Pang plots contain only blue archive points.
+Every true-evaluated model proposal consumes one FE, including proposals that
+are nonfinite, duplicated, dominated, or diagnostically flagged. Direction,
+local-support, and empirical-envelope checks guide adaptive querying and remain
+in the audit record; final retention uses finite, objective-unique,
+nondominated merging.
 
-Generate a report for one saved run or recursively render a result tree:
-
-```bash
-python -m reporting.visualize --help
-python -m reporting.visualize_batch --roots results/stage1
-python -m reporting.compare_ratios --stage1-root results/stage1
-python -m reporting.compare_stage1_hv --stage1-root results/stage1
-```
-
-The seven-method comparison and repeated-run statistical analysis are exposed
-as modules so the repository root remains limited to formal run entry points:
+For figures, EA archive points are blue and surviving model points are red.
+Pure EA and Pang figures contain blue points only. Visualize a saved run with:
 
 ```bash
-python -m reporting.compare_methods --help
-python -m reporting.statistics --help
+python -m reporting.visualize --run-dir <run-directory>
 ```
 
-The shell launchers accept `PROJECT_ROOT`, `PYTHON_BIN`, `PLATEMO_ROOT`, and
-`OUTPUT_DIR` environment variables. Their defaults reproduce the experiment
-server layout used in this study.
+## Reproducibility checks
 
-## Reproducibility rules
+- Equal true-FE budgets within each problem.
+- Paired seeds across methods.
+- Objective-vector deduplication before archive size and metrics.
+- Fixed external ideal/nadir values and HV reference point `(1.1, ..., 1.1)`.
+- Pang-style projected IGD-infinity with one fixed reference set per problem.
+- Runtime excludes metric calculation, plotting, and artifact serialization.
+- Representative PF figures use the run nearest the method-problem median
+  projected IGD-infinity.
 
-1. Methods compared on one problem receive the same total true FE budget.
-2. The same paired seed initializes every method on that problem.
-3. Objective-vector deduplication precedes archive size and metric reporting.
-4. HV uses fixed external ideal/nadir values and the normalized reference
-   point `(1.1, ..., 1.1)`.
-5. IGD-infinity uses one fixed, full-dimensional reference set per problem.
-   Packaged RE tasks use `data/RE/ParetoFront/RE*.dat`, normalized with the
-   corresponding fixed ideal/nadir files before objective-pair projection.
-6. Runtime includes EA search, hole processing, model training, candidate
-   generation, true evaluation, and archive update; plotting and metrics are
-   excluded.
-7. Result figures use the run nearest the method's median IGD-infinity rather
-   than a hand-picked best run.
-
-## Tests
-
-Run the local unit tests with:
+Run the local checks with:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-MATLAB/PlatEMO integration is checked separately on the experiment server.
+GitHub Actions runs the same test suite on every push and pull request.
 
-## References
+## Reference
 
 Pang, L. M., Nan, Y., and Ishibuchi, H. "How to Find a Large Solution Set to
 Cover the Entire Pareto Front in Evolutionary Multi-Objective Optimization."
-2023 IEEE International Conference on Systems, Man, and Cybernetics (SMC),
-pp. 1188-1194, 2023.
+IEEE SMC, pp. 1188--1194, 2023.
 
-PlatEMO should be cited according to the citation instructions distributed
-with the installed PlatEMO version.
+PlatEMO must be cited according to the citation instructions distributed with
+the installed PlatEMO version.

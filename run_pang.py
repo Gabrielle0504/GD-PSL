@@ -1,6 +1,6 @@
 """Pang--Nan--Ishibuchi large-solution-set archive baseline.
 
-This runner is deliberately independent from ``run_fill_then_judge.py``.  It
+This runner is deliberately independent from ``run_gd_psl.py``. It
 uses PlatEMO only for evolutionary search and keeps the complete evaluation
 history as an unbounded archive. The reported UEA is the unique nondominated
 subset of that history, exactly as in the authors' supplied code. No Pareto-set
@@ -21,24 +21,23 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 import numpy as np
-from evaluation_metrics import (
+from gd_psl.metrics import (
     archive_igd_infinity_report,
     hypervolume,
     load_benchmark_reference_front,
     normalize_objectives,
     resolve_normalization_points,
 )
-from experiment_config import (
+from gd_psl.config import (
     COMPARISON_POPULATION_SIZE,
     COMPARISON_TOTAL_FE_BUDGET,
     DEFAULT_CONFIG,
     IGD_INFINITY_REFERENCE_SAMPLES,
 )
-from gd_psl.platemo import reference_front
-from problem_definitions import get_problem
-from result_layout import run_directory
-from matlab_engine_utils import start_matlab_with_retry
-from pareto_utils import nondominated_indices as _shared_nondominated_indices
+from gd_psl.archive import nondominated_indices as _shared_nondominated_indices
+from gd_psl.artifacts import run_directory
+from gd_psl.platemo import reference_front, start_matlab_with_retry
+from gd_psl.problems import get_problem
 
 
 def _as_2d(values: np.ndarray, columns: Optional[int] = None) -> np.ndarray:

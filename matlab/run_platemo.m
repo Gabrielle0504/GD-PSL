@@ -22,10 +22,8 @@ function [X, F, C, HistoryX, HistoryF, HistoryFE, HistoryTime] = run_platemo(alg
     if isfolder(loggedProblemDir)
         addpath(genpath(loggedProblemDir));
     end
-    % The project ships RE21--RE91 definitions because they are not present
-    % in every PlatEMO distribution.  Add them after PlatEMO so the custom
-    % classes are discoverable by str2func while the optimizer remains
-    % PlatEMO's implementation.
+    % The project ships the seven RE definitions used by the formal suite.
+    % Add them after PlatEMO so the optimizer remains PlatEMO's implementation.
     customProblemDir = fullfile(bridgeDir, 're_problems');
     if isfolder(customProblemDir)
         addpath(genpath(customProblemDir));
@@ -50,18 +48,8 @@ function [X, F, C, HistoryX, HistoryF, HistoryFE, HistoryTime] = run_platemo(alg
         algorithmHandle = str2func(char(algorithmName));
     end
     requestedProblem = upper(char(problemName));
-    if strcmp(requestedProblem, 'DTLZ1')
-        problemHandle = @LoggedDTLZ1;
-    elseif strcmp(requestedProblem, 'DTLZ2')
+    if strcmp(requestedProblem, 'DTLZ2')
         problemHandle = @LoggedDTLZ2;
-    elseif strcmp(requestedProblem, 'DTLZ3')
-        problemHandle = @LoggedDTLZ3;
-    elseif strcmp(requestedProblem, 'DTLZ4')
-        problemHandle = @LoggedDTLZ4;
-    elseif strcmp(requestedProblem, 'DTLZ5')
-        problemHandle = @LoggedDTLZ5;
-    elseif strcmp(requestedProblem, 'DTLZ6')
-        problemHandle = @LoggedDTLZ6;
     elseif strcmp(requestedProblem, 'DTLZ7')
         problemHandle = @LoggedDTLZ7;
     else

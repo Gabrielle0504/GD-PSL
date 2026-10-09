@@ -17,12 +17,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from evaluation_metrics import (
+from gd_psl.metrics import (
     load_benchmark_reference_front,
     normalize_objectives,
     projected_igd_infinity,
 )
-from experiment_config import ALLOWED_EA_FILL_SPLITS
+from gd_psl.config import ALLOWED_EA_FILL_SPLITS
 
 
 RATIOS = tuple(ALLOWED_EA_FILL_SPLITS)

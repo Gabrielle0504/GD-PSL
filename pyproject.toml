@@ -16,17 +16,10 @@ training = ["schedulefree>=1.4"]
 test = ["pytest>=8"]
 
 [tool.setuptools]
-packages = ["gd_psl", "reporting", "tools"]
+packages = ["gd_psl", "reporting"]
 py-modules = [
-    "evaluation_metrics",
-    "experiment_config",
-    "matlab_engine_utils",
-    "pareto_set_model",
-    "pareto_utils",
-    "problem_definitions",
-    "result_layout",
-    "run_fill_then_judge",
-    "run_pang_archive_baseline",
+    "run_gd_psl",
+    "run_pang",
 ]
 
 [tool.pytest.ini_options]

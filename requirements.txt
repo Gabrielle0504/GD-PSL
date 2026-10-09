@@ -1,5 +1,0 @@
-# Install the CUDA-compatible PyTorch build for the target server first.
-matplotlib>=3.8
-numpy>=1.26
-scipy>=1.12
-torch>=2.4

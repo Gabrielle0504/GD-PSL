@@ -10,15 +10,14 @@ import numpy as np
 import torch
 from scipy.spatial import cKDTree
 
-from evaluation_metrics import (
+from .metrics import (
     archive_hypervolume_report,
     archive_igd_infinity_report,
     load_benchmark_reference_front,
     resolve_normalization_points,
 )
-from experiment_config import COMPLETION_METHOD, ExperimentConfig
-from problem_definitions import get_problem
-from result_layout import method_directory_name, run_directory
+from .config import COMPLETION_METHOD, ExperimentConfig
+from .problems import get_problem
 
 from .archive import (
     EPS,
@@ -27,7 +26,7 @@ from .archive import (
     objectives_to_preferences,
     standardize_base_result,
 )
-from .artifacts import save_run_artifacts
+from .artifacts import method_directory_name, run_directory, save_run_artifacts
 from .candidate_validation import validate_empirical_candidates
 from .holes import (
     adapt_gap_preferences,

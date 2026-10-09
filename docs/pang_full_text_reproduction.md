@@ -8,7 +8,7 @@ SMC 2023, pp. 1188--1194.
 
 | Paper requirement | Local implementation | Status |
 |---|---|---|
-| Store every examined solution in an unbounded archive | `run_pang_archive_baseline.py` writes `evaluations_*` and `unbounded_archive.csv` | Reproduced |
+| Store every examined solution in an unbounded archive | `run_pang.py` writes `evaluations_*` and `unbounded_archive.csv` | Reproduced |
 | Remove duplicate objective vectors and dominated archive rows for the reported PF archive | `nondominated_indices()` and the archive construction in `run_one()` | Reproduced |
 | PBI-based MOEA/D with penalty 5 | `matlab/PangMOEAD.m`, `type == 1`, penalty constant 5 | Reproduced |
 | Perturb every weight-vector element every 100 generations | `matlab/PangMOEAD.m`, `perturbationPeriod = 100` | Reproduced |
@@ -21,7 +21,7 @@ SMC 2023, pp. 1188--1194.
 | Replace average IGD by maximum distance, Eq. (3) | `max(distances)` per pair | Reproduced |
 | Take the maximum indicator over all objective-pair projections | `max(pair_scores)` | Reproduced |
 | Authors' DTLZ2 quarter-disk and DTLZ7 `optimum1`/`optimum2` reference construction | `pang_projection_references()`; default `--coverage-samples 50000` | Reproduced |
-| Exact objective-vector deduplication of the nondominated evaluation history to form UEA | `run_pang_archive_baseline.py` and `baselines/pang_2023_baseline.py` | Reproduced |
+| Exact objective-vector deduplication of the nondominated evaluation history to form UEA | `run_pang.py` and `baselines/pang_2023_baseline.py` | Reproduced |
 
 ## Scope boundaries
 

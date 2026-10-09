@@ -18,12 +18,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import friedmanchisquare, rankdata, wilcoxon
 
-from evaluation_metrics import normalize_objectives, resolve_normalization_points
-from problem_definitions import get_problem
-from result_layout import problem_directory_name, run_directory
-from .compare_methods import METHOD_LABELS, METHODS, _method_front
+from gd_psl.archive import nondominated_indices
+from gd_psl.artifacts import problem_directory_name, run_directory
+from gd_psl.metrics import normalize_objectives, resolve_normalization_points
+from gd_psl.problems import get_problem
 
 
+METHODS = (
+    "EA_NSGAII",
+    "EA_NSGAIII",
+    "EA_MOEAD",
+    "GD-PSL_NSGAII",
+    "GD-PSL_NSGAIII",
+    "GD-PSL_MOEAD",
+    "PangMOEAD",
+)
+METHOD_LABELS = {
+    "EA_NSGAII": "NSGA-II",
+    "EA_NSGAIII": "NSGA-III",
+    "EA_MOEAD": "MOEA/D",
+    "GD-PSL_NSGAII": "GD-PSL + NSGA-II",
+    "GD-PSL_NSGAIII": "GD-PSL + NSGA-III",
+    "GD-PSL_MOEAD": "GD-PSL + MOEA/D",
+    "PangMOEAD": "Pang",
+}
 PROBLEMS = (
     "dtlz2",
     "dtlz7",
@@ -36,6 +54,54 @@ PROBLEMS = (
     "re37",
 )
 DEFAULT_SEEDS = tuple(range(101, 121))
+
+
+def _finite_rows(values: np.ndarray, columns: int | None = None) -> np.ndarray:
+    array = np.asarray(values, dtype=float)
+    if array.size == 0:
+        return np.empty((0, columns or 0), dtype=float)
+    if array.ndim == 1:
+        array = array.reshape(1, -1)
+    return array[np.isfinite(array).all(axis=1)]
+
+
+def _method_front(
+    run_dir: Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Reconstruct the cumulative empirical front from saved evaluations."""
+
+    def cumulative_front(values: np.ndarray) -> np.ndarray:
+        finite = _finite_rows(values)
+        if not len(finite):
+            return finite
+        unique = np.unique(finite, axis=0)
+        return unique[nondominated_indices(unique)]
+
+    with np.load(run_dir / "fronts.npz") as data:
+        history_key = "evaluations_f" if "evaluations_f" in data else "stage1_f"
+        history = _finite_rows(data[history_key])
+        ea_archive = cumulative_front(history)
+
+        if "completed_f" in data and "completed_sources" in data:
+            raw_completed = np.asarray(data["completed_f"], dtype=float)
+            source_values = np.asarray(data["completed_sources"], dtype=int).reshape(-1)
+            source_values = source_values[: len(raw_completed)]
+            finite_completed = np.isfinite(raw_completed).all(axis=1)
+            model_points = raw_completed[(source_values == 1) & finite_completed]
+        else:
+            model_points = np.empty((0, history.shape[1]))
+
+    combined = np.vstack((ea_archive, model_points))
+    sources = np.concatenate(
+        (np.zeros(len(ea_archive), dtype=int), np.ones(len(model_points), dtype=int))
+    )
+    if len(combined):
+        _, unique = np.unique(combined, axis=0, return_index=True)
+        unique.sort()
+        combined, sources = combined[unique], sources[unique]
+        front = nondominated_indices(combined)
+        combined, sources = combined[front], sources[front]
+    return combined, history, ea_archive, combined[sources == 1]
 
 
 @dataclass(frozen=True)

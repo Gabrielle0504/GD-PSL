@@ -35,17 +35,6 @@ baselines/SMC2023-codes/
 # from the executable research-code release.
 paper/
 
-# Local presentation material and superseded development notes
-docs/create_hole_slide.py
-docs/hole_method_slide.pptx
-docs/hole_method_speaker_script.md
-docs/fill_then_judge_pseudocode.md
-docs/pang_paper_reproduction_questions.md
-tools/legacy/
-
-# Reviewer-only counterfactual analyses are not part of the canonical pipeline
-reporting/reaggregate_validation_gate.py
-
 # Local packaging and MATLAB artifacts
 *.tar.gz
 *.asv

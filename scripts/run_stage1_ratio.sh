@@ -30,7 +30,7 @@ output_root="${OUTPUT_DIR:-$project_root/results/stage1/ratio_$tag}"
 cd "$project_root"
 mkdir -p "$output_root"
 
-"$python_bin" -u run_fill_then_judge.py \
+"$python_bin" -u run_gd_psl.py \
     --algorithms NSGAII NSGAIII MOEAD \
     --problems re21 re24 \
     --population-size 100 \
@@ -44,7 +44,7 @@ mkdir -p "$output_root"
     --platemo-root "$platemo_root" \
     --output-dir "$output_root"
 
-"$python_bin" -u run_fill_then_judge.py \
+"$python_bin" -u run_gd_psl.py \
     --algorithms NSGAII NSGAIII MOEAD \
     --problems dtlz2 dtlz7 re31 re32 re34 re35 re37 \
     --n-objectives 3 \

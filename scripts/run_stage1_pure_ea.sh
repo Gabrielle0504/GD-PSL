@@ -35,13 +35,13 @@ common=(
     --no-plot
 )
 
-"$python_bin" run_fill_then_judge.py \
+"$python_bin" run_gd_psl.py \
     "${common[@]}" \
     --problems re21 re24 \
     --population-size 100 \
     --max-fe 100000
 
-"$python_bin" run_fill_then_judge.py \
+"$python_bin" run_gd_psl.py \
     "${common[@]}" \
     --problems dtlz2 dtlz7 re31 re32 re34 re35 re37 \
     --n-objectives 3 \

@@ -6,7 +6,7 @@ import argparse
 from dataclasses import replace
 from typing import Optional, Sequence
 
-from experiment_config import ALLOWED_EA_FILL_SPLITS, DEFAULT_CONFIG, ExperimentConfig
+from gd_psl.config import ALLOWED_EA_FILL_SPLITS, DEFAULT_CONFIG, ExperimentConfig
 from gd_psl.runner import run_experiments
 
 

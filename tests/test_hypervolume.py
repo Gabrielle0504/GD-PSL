@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from evaluation_metrics import hypervolume
+from gd_psl.metrics import hypervolume
 
 
 def brute_force_3d(points: np.ndarray, reference: np.ndarray) -> float:

@@ -6,7 +6,7 @@ from dataclasses import replace
 
 import numpy as np
 
-from experiment_config import ALLOWED_EA_FILL_SPLITS, DEFAULT_CONFIG
+from gd_psl.config import ALLOWED_EA_FILL_SPLITS, DEFAULT_CONFIG
 from gd_psl.archive import classify_model_candidates
 from gd_psl.candidate_validation import (
     _inside_empirical_hull,

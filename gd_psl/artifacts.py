@@ -9,9 +9,39 @@ from typing import Optional
 
 import numpy as np
 
-from experiment_config import ExperimentConfig
-from result_layout import method_directory_name, run_directory
+from .config import ExperimentConfig
 from .archive import as_2d
+
+
+def safe_name(value: str) -> str:
+    return "".join(
+        character if character.isalnum() or character in "-_" else "_"
+        for character in value
+    )
+
+
+def problem_directory_name(problem: str, n_objectives: int) -> str:
+    return f"{safe_name(problem.upper())}_{n_objectives}obj"
+
+
+def method_directory_name(algorithm: str, uses_model: bool) -> str:
+    prefix = "GD-PSL" if uses_model else "EA"
+    return f"{prefix}_{safe_name(algorithm.upper())}"
+
+
+def run_directory(
+    output_root: str | Path,
+    method: str,
+    problem: str,
+    n_objectives: int,
+    seed: int,
+) -> Path:
+    return (
+        Path(output_root)
+        / safe_name(method)
+        / problem_directory_name(problem, n_objectives)
+        / f"seed_{seed:03d}"
+    )
 
 def write_front_csv(
     path: Path,

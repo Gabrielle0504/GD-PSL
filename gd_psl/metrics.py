@@ -10,7 +10,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 from scipy.stats import qmc
 
-from pareto_utils import nondominated_indices
+from .archive import nondominated_indices
 
 
 def _as_vector(value: Any, n_objectives: int, name: str) -> np.ndarray:
@@ -29,7 +29,7 @@ def resolve_normalization_points(
     project_root: Path | None = None,
 ) -> tuple[np.ndarray, np.ndarray, str]:
     """Resolve fixed benchmark ideal/nadir points without using run outcomes."""
-    root = project_root or Path(__file__).resolve().parent
+    root = project_root or Path(__file__).resolve().parents[1]
     family = "RE" if problem_name.lower().startswith("re") else "DTLZ_WFG"
     directory = root / "data" / family / "ideal_nadir_points"
     suffix = problem_name.upper() if family == "RE" else problem_name.lower()
@@ -60,7 +60,7 @@ def load_benchmark_reference_front(
     project_root: Path | None = None,
 ) -> tuple[np.ndarray, str]:
     """Load a fixed full-dimensional reference PF shipped with the project."""
-    root = project_root or Path(__file__).resolve().parent
+    root = project_root or Path(__file__).resolve().parents[1]
     family = "RE" if problem_name.lower().startswith("re") else "DTLZ_WFG"
     suffix = problem_name.upper() if family == "RE" else problem_name.lower()
     path = root / "data" / family / "ParetoFront" / f"{suffix}.dat"

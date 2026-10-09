@@ -2,16 +2,33 @@ import unittest
 
 import numpy as np
 
-from evaluation_metrics import (
+from gd_psl.metrics import (
     archive_igd_infinity_report,
     load_benchmark_reference_front,
     pang_projected_igd_infinity,
     pang_projection_references,
 )
-from run_pang_archive_baseline import default_pang_population_size, parse_args
+from run_pang import default_pang_population_size, parse_args
 
 
 class PangProtocolTests(unittest.TestCase):
+    def test_formal_suite_reference_files_are_complete(self) -> None:
+        tasks = {
+            "dtlz2": 3,
+            "dtlz7": 3,
+            "re21": 2,
+            "re24": 2,
+            "re31": 3,
+            "re32": 3,
+            "re34": 3,
+            "re35": 3,
+            "re37": 3,
+        }
+        for problem, objectives in tasks.items():
+            with self.subTest(problem=problem):
+                reference, _ = load_benchmark_reference_front(problem, objectives)
+                self.assertEqual(reference.shape[1], objectives)
+
     def test_re_reference_front_is_loaded_from_project_data(self) -> None:
         reference, source = load_benchmark_reference_front("re37", 3)
 

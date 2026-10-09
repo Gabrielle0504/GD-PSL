@@ -8,16 +8,33 @@ from typing import Optional
 
 import numpy as np
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
-from experiment_config import ExperimentConfig
-from pareto_set_model import ParetoSetModel
+from .config import ExperimentConfig
 from .local_refinement import refine_model_decisions
 
 try:
     import schedulefree
 except ImportError:
     schedulefree = None
+
+
+class ParetoSetModel(nn.Module):
+    """MLP mapping objective preferences to normalized decisions."""
+
+    def __init__(self, n_dim: int, n_obj: int, hidden_width: int):
+        super().__init__()
+        if hidden_width <= 0:
+            raise ValueError("hidden_width must be positive")
+        self.fc1 = nn.Linear(n_obj, hidden_width)
+        self.fc2 = nn.Linear(hidden_width, hidden_width)
+        self.fc3 = nn.Linear(hidden_width, n_dim)
+
+    def forward(self, preference: torch.Tensor) -> torch.Tensor:
+        values = torch.relu(self.fc1(preference))
+        values = torch.relu(self.fc2(values))
+        return torch.sigmoid(self.fc3(values)).to(torch.float64)
 
 
 class PreferenceDataset(Dataset):
