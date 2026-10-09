@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Environments and editors
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+.ipynb_checkpoints/
+.ssh_stage1_config
+
+# Generated experiment artifacts
+results/*
+!results/.gitkeep
+*.log
+
+# Local synchronization and browser-automation artifacts
+.tmp_*
+
+# Third-party reference package used during the Pang audit. The publishable
+# baseline is implemented by baselines/pang_2023_baseline.py and matlab/PangMOEAD.m.
+baselines/SMC2023-codes/
+
+# Manuscript sources and local build/audit artifacts are maintained separately
+# from the executable research-code release.
+paper/
+
+# Local presentation material and superseded development notes
+docs/create_hole_slide.py
+docs/hole_method_slide.pptx
+docs/hole_method_speaker_script.md
+docs/fill_then_judge_pseudocode.md
+docs/pang_paper_reproduction_questions.md
+tools/legacy/
+
+# Reviewer-only counterfactual analyses are not part of the canonical pipeline
+reporting/reaggregate_validation_gate.py
+
+# Local packaging and MATLAB artifacts
+*.tar.gz
+*.asv
+*.mex*
+
+# Historical outputs bundled with the authors' Pang reference package
+baselines/SMC2023-codes/Data/**/*.mat
+baselines/SMC2023-codes/Data/**/*.fig
+baselines/SMC2023-codes/Data/**/*.png
+
+# Operating systems
+.DS_Store
+Thumbs.db

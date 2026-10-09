@@ -1,0 +1,33 @@
+[project]
+name = "gd-psl"
+version = "0.1.0"
+description = "Gap-Directed Pareto Set Learning for Pareto-front completion"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "scipy>=1.12",
+    "torch>=2.4",
+]
+
+[project.optional-dependencies]
+training = ["schedulefree>=1.4"]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["gd_psl", "reporting", "tools"]
+py-modules = [
+    "evaluation_metrics",
+    "experiment_config",
+    "matlab_engine_utils",
+    "pareto_set_model",
+    "pareto_utils",
+    "problem_definitions",
+    "result_layout",
+    "run_fill_then_judge",
+    "run_pang_archive_baseline",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
